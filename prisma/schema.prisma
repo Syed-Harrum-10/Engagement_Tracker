@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  createdAt     DateTime       @default(now())
+  events        Event[]
+  userInterests UserInterest[]
+}
+
+model Image {
+  id       Int     @id @default(autoincrement())
+  url      String
+  category String
+  events   Event[]
+}
+
+model Event {
+  id           Int      @id @default(autoincrement())
+  dwellSeconds Int
+  createdAt    DateTime @default(now())
+  userId       Int
+  imageId      Int
+  user         User     @relation(fields: [userId], references: [id])
+  image        Image    @relation(fields: [imageId], references: [id])
+}
+
+model UserInterest {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  category String
+  score    Float  @default(0)
+  user     User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, category])
+}
