@@ -1,9 +1,21 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+    ConflictException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ApiService {
-    constructor(private Client: PrismaService) {}
+    private readonly salt = 10;
+
+    constructor(
+        private readonly Client: PrismaService,
+        private readonly jwtService: JwtService,
+    ) { }
 
     // IMAGES
     async getImages(category?: string) {
@@ -19,10 +31,66 @@ export class ApiService {
     }
 
     // USERS
-    async createUser(email: string) {
-        const existing = await this.Client.user.findUnique({ where: { email } });
-        if (existing) throw new ConflictException('Email already exists');
-        return this.Client.user.create({ data: { email } });
+    async createUser(name: string, password: string, email: string) {
+        const normalizedEmail = email.toLowerCase();
+        const existing = await this.Client.user.findUnique({
+            where: { email: normalizedEmail },
+        });
+
+        if (existing) {
+            throw new ConflictException('Email already exists');
+        }
+
+        const hashedPassword = await bcrypt.hash(password, this.salt);
+        const createdUser = await this.Client.user.create({
+            data: {
+                name,
+                password: hashedPassword,
+                email: normalizedEmail,
+            },
+        });
+
+        return {
+            user: {
+                id: createdUser.id,
+                name: createdUser.name,
+                email: createdUser.email,
+                createdAt: createdUser.createdAt,
+            },
+        };
+    }
+
+    async login(email: string, password: string) {
+        const normalizedEmail = email.toLowerCase();
+        const existingUser = await this.Client.user.findUnique({
+            where: { email: normalizedEmail },
+        });
+
+        if (!existingUser) {
+            throw new UnauthorizedException('Email or Password is Incorrect');
+        }
+
+        const passwordMatches = await bcrypt.compare(password, existingUser.password);
+        if (!passwordMatches) {
+            throw new UnauthorizedException('Email or Password is Incorrect');
+        }
+
+        const payload = {
+            sub: existingUser.id,
+            name: existingUser.name,
+            email: existingUser.email,
+        };
+
+        const token = await this.jwtService.signAsync(payload);
+
+        return {
+            accessToken: token,
+            user: {
+                id: existingUser.id,
+                name: existingUser.name,
+                email: existingUser.email,
+            },
+        };
     }
 
     // EVENTS

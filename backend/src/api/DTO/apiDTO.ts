@@ -1,4 +1,4 @@
-import { IsEmail, IsInt, Min } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 
 export class CreateEventDto {
   @IsInt()
@@ -13,6 +13,23 @@ export class CreateEventDto {
 }
 
 export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
   @IsEmail()
   email: string;
+}
+
+export class LoginDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 }

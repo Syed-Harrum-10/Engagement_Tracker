@@ -7,9 +7,11 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiService } from './api.service';
-import { CreateEventDto, CreateUserDto } from '../api/DTO/apiDTO';
+import { CreateEventDto, CreateUserDto } from './DTO/apiDTO';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('api')
 export class ApiController {
@@ -25,11 +27,21 @@ export class ApiController {
     return this.apiService.getImageById(id);
   }
 
-  @Post('users')
+  @Post('users/register')
   createUser(@Body() createUserDto: CreateUserDto) {
-    return this.apiService.createUser(createUserDto.email);
+    return this.apiService.createUser(
+      createUserDto.name,
+      createUserDto.password,
+      createUserDto.email,
+    );
   }
 
+  @Post('users/login')
+  Login (@Body() CreateUserDto: CreateUserDto) {
+    return this.apiService.login(CreateUserDto.email, CreateUserDto.password);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('events')
   createEvent(@Body() eventDto: CreateEventDto) {
     return this.apiService.createEvent(
@@ -39,21 +51,25 @@ export class ApiController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('users/:userId/interests')
   getInterests(@Param('userId', ParseIntPipe) userId: number) {
     return this.apiService.getInterests(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('users/:userId/feed')
   getFeed(@Param('userId', ParseIntPipe) userId: number) {
     return this.apiService.getFeed(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('analytics/top-categories')
   topCategories() {
     return this.apiService.topCategories();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('analytics/views-per-day')
   viewsPerDay() {
     return this.apiService.viewsPerDay();
