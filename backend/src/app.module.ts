@@ -8,6 +8,8 @@ import { ApiService } from './api/api.service';
 import { ApiController } from './api/api.controller';
 import { ApiModule } from './api/api.module';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { JWT_SECRET } from './auth/jwt.constants';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -15,9 +17,10 @@ import { JwtStrategy } from './auth/jwt.strategy';
     ApiModule,
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET ?? 'dev-secret',
+      secret: JWT_SECRET,
       signOptions: { expiresIn: '1d' },
     }),
+    RedisModule,
   ],
   controllers: [AppController, ApiController],
   providers: [AppService, ApiService, JwtStrategy],

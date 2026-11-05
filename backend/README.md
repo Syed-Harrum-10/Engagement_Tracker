@@ -31,6 +31,43 @@
 $ npm install
 ```
 
+## Redis configuration
+
+The backend connects to Redis at `REDIS_HOST` (default: `127.0.0.1`) and
+`REDIS_PORT` (default: `6379`). Set `REDIS_HOST` to the hostname of your Redis
+server and make sure it is reachable before starting the backend.
+
+Set `JWT_SECRET` to the same secret used to sign and verify access tokens. The
+development fallback is `dev-secret`; configure a strong secret in production.
+Successful login also sets an HttpOnly `access_token` cookie. The backend accepts
+that cookie or an `Authorization: Bearer <token>` header. Browser clients making
+cross-origin requests must send credentials.
+
+## Docker
+
+Create `backend/.env` with the required application settings, including
+`DATABASE_URL` and `JWT_SECRET`. The Compose configuration starts the backend
+and Redis; the backend connects to the Redis service automatically.
+
+From the `backend` directory, build and start the services with:
+
+```bash
+docker compose up --build -d
+```
+
+Check the service status and backend logs with:
+
+```bash
+docker compose ps
+docker compose logs -f engagement
+```
+
+The backend is available at `http://localhost:3000`. Stop the services with:
+
+```bash
+docker compose down
+```
+
 ## Compile and run the project
 
 ```bash

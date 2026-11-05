@@ -7,11 +7,14 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiService } from './api.service';
 import { CreateEventDto, CreateUserDto } from './DTO/apiDTO';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JWT_COOKIE_NAME } from '../auth/jwt.constants';
 
 @Controller('api')
 export class ApiController {
@@ -37,8 +40,24 @@ export class ApiController {
   }
 
   @Post('users/login')
-  Login (@Body() CreateUserDto: CreateUserDto) {
-    return this.apiService.login(CreateUserDto.email, CreateUserDto.password);
+  async Login(
+    @Body() createUserDto: CreateUserDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.apiService.login(
+      createUserDto.email,
+      createUserDto.password,
+    );
+
+    response.cookie(JWT_COOKIE_NAME, result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    return result;
   }
 
   @UseGuards(JwtAuthGuard)
