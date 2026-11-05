@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiService } from './api.service';
-import { CreateEventDto, CreateUserDto } from './DTO/apiDTO';
+import { CreateEventDto, CreateUserDto, LoginDto } from './DTO/apiDTO';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JWT_COOKIE_NAME } from '../auth/jwt.constants';
 
@@ -41,12 +41,12 @@ export class ApiController {
 
   @Post('users/login')
   async Login(
-    @Body() createUserDto: CreateUserDto,
+    @Body() LoginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
     const result = await this.apiService.login(
-      createUserDto.email,
-      createUserDto.password,
+      LoginDto.email,
+      LoginDto.password,
     );
 
     response.cookie(JWT_COOKIE_NAME, result.accessToken, {
