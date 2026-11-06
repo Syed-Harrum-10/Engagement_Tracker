@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://user:pass@localhost:5432/db" npx prisma generate
 RUN npm run build
 
 FROM node:20-bookworm-slim AS production
