@@ -82,5 +82,3 @@ npm run dev
 
 ## Screenshots
 
-![Dashboard](/Users/harrum/Desktop/Screen\ Shot\ 2026-11-06\ at\ 8.50.18\ AM.png)
-![Home Feed](screenshots//Users/harrum/Desktop/Screen\ Shot\ 2026-11-06\ at\ 8.49.56\ AM.png )
