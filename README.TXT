@@ -78,7 +78,5 @@ VITE_API_URL=http://localhost:3000
 ```
 npm install
 npm run dev
+
 ```
-
-## Screenshots
-
